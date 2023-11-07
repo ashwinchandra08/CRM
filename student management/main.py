@@ -167,10 +167,10 @@ def search():
         
     return render_template('search.html')
 
-@app.route("/delete/<string:id>",methods=['POST','GET'])
+@app.route("/delete/<string:Cust_ID>",methods=['POST','GET'])
 @login_required
-def delete(id):
-    post=Customer.query.filter_by(id=id).first()
+def delete(Cust_ID):
+    post=Customer.query.filter_by(Cust_ID=Cust_ID).first()
     db.session.delete(post)
     db.session.commit()
     # db.engine.execute(f"DELETE FROM `student` WHERE `student`.`id`={id}")
