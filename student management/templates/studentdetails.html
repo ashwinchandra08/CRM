@@ -26,15 +26,10 @@ Customer Details
 <table class="table">
   <thead class="thead-light">
     <tr>
-      <th scope="col">SID</th>
-      <th scope="col">ROLL NUMBER</th>
-      <th scope="col">STUDENT NAME</th>
-      <th scope="col">SEM</th>
-      <th scope="col">GENDER</th>
-      <th scope="col">BRANCH</th>
-      <th scope="col">EMAIL</th>
-      <th scope="col">NUMBER</th>
+      <th scope="col">CUST ID</th>
+      <th scope="col">CUSTOMER NAME</th>
       <th scope="col">ADDRESS</th>
+      <th scope="col">PHONE NUMBER</th>
       <th scope="col">EDIT</th>
       <th scope="col">DELETE</th>
 
@@ -43,17 +38,12 @@ Customer Details
   <tbody>
   {% for post in query %}
     <tr>
-      <th scope="row">{{post.id}}</th>
-      <td>{{post.rollno}}</td>
-      <td>{{post.sname}}</td>
-      <td>{{post.sem}}</td>
-      <td>{{post.gender}}</td>
-      <td>{{post.branch}}</td>
-      <td>{{post.email}}</td>
-      <td>{{post.number}}</td>
-      <td>{{post.address}}</td>
-    <td><a href="/edit/{{post.id}}"><button class="btn btn-primary">Edit </button> </a> </td>
-    <td><a href="/delete/{{post.id}}"><button onclick="return confirm('Are you sure to Delete data');" class="btn btn-danger">Delete </button> </a> </td>
+      <th scope="row">{{post.Cust_ID}}</th>
+      <td>{{post.Name}}</td>
+      <td>{{post.Address}}</td>
+      <td>{{post.Phone_No}}</td>
+    <td><a href="/edit/{{post.Cust_ID}}"><button class="btn btn-primary">Edit </button> </a> </td>
+    <td><a href="/delete/{{post.Cust_ID}}"><button onclick="return confirm('Are you sure to Delete data');" class="btn btn-danger">Delete </button> </a> </td>
     </tr>
 {% endfor %}
   

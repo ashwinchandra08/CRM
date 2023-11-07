@@ -178,34 +178,26 @@ def delete(id):
     return redirect('/studentdetails')
 
 
-@app.route("/edit/<string:id>",methods=['POST','GET'])
+@app.route("/edit/<string:Cust_ID>",methods=['POST','GET'])
 @login_required
-def edit(id):
+def edit(Cust_ID):
     # dept=db.engine.execute("SELECT * FROM `department`")    
     if request.method=="POST":
-        rollno=request.form.get('rollno')
-        sname=request.form.get('sname')
-        sem=request.form.get('sem')
-        gender=request.form.get('gender')
-        branch=request.form.get('branch')
-        email=request.form.get('email')
-        num=request.form.get('num')
-        address=request.form.get('address')
+        Cust_ID=request.form.get('Cust_ID')
+        Name=request.form.get('Name')
+        Address=request.form.get('Address')
+        Phone_No=request.form.get('Phone_No')
         # query=db.engine.execute(f"UPDATE `student` SET `rollno`='{rollno}',`sname`='{sname}',`sem`='{sem}',`gender`='{gender}',`branch`='{branch}',`email`='{email}',`number`='{num}',`address`='{address}'")
-        post=Customer.query.filter_by(id=id).first()
-        post.rollno=rollno
-        post.sname=sname
-        post.sem=sem
-        post.gender=gender
-        post.branch=branch
-        post.email=email
-        post.number=num
-        post.address=address
+        post=Customer.query.filter_by(Cust_ID=Cust_ID).first()
+        post.Cust_ID=Cust_ID
+        post.Name=Name
+        post.Address=Address
+        post.Phone_No=Phone_No
         db.session.commit()
         flash("Slot is Updates","success")
         return redirect('/studentdetails')
     dept=Product.query.all()
-    posts=Customer.query.filter_by(id=id).first()
+    posts=Customer.query.filter_by(Cust_ID=Cust_ID).first()
     return render_template('edit.html',posts=posts,dept=dept)
 
 
@@ -266,16 +258,12 @@ def addstudent():
     # dept=db.engine.execute("SELECT * FROM `department`")
     dept=Product.query.all()
     if request.method=="POST":
-        rollno=request.form.get('rollno')
-        sname=request.form.get('sname')
-        sem=request.form.get('sem')
-        gender=request.form.get('gender')
-        branch=request.form.get('branch')
-        email=request.form.get('email')
-        num=request.form.get('num')
-        address=request.form.get('address')
+        Cust_ID=request.form.get('Cust_ID')
+        Name=request.form.get('Name')
+        Address=request.form.get('Address')
+        Phone_No=request.form.get('Phone_No')
         # query=db.engine.execute(f"INSERT INTO `student` (`rollno`,`sname`,`sem`,`gender`,`branch`,`email`,`number`,`address`) VALUES ('{rollno}','{sname}','{sem}','{gender}','{branch}','{email}','{num}','{address}')")
-        query=Customer(rollno=rollno,sname=sname,sem=sem,gender=gender,branch=branch,email=email,number=num,address=address)
+        query=Customer(Cust_ID = Cust_ID,Name = Name,Address=Address,Phone_No=Phone_No)
         db.session.add(query)
         db.session.commit()
 

@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% block title %}
-Add Students
+Add Customers
 {% endblock title %}
 
 
 
 {% block body %}
- <h3 class="text-center"><span>Add Student Details</span> </h3>
+ <h3 class="text-center"><span>Add Customer Details</span> </h3>
   
 {% with messages=get_flashed_messages(with_categories=true) %}
 {% if messages %}
@@ -31,59 +31,28 @@ Add Students
 <form action="/addstudent" method="post">
 <div class="form-group">
 
-<label for="rollno">Customer ID</label>
-<input type="text" class="form-control" name="rollno" id="rollno">
+<label for="sem">Cust ID</label>
+<input type="number" class="form-control" name="Cust_ID" id="Cust_ID">
 </div>
 <br>
-<div class="form-group">
 
 <label for="sname">Customer Name</label>
-<input type="text" class="form-control" name="sname" id="sname">
+<input type="text" class="form-control" name="Name" id="Name">
 </div>
 <br>
+
 <div class="form-group">
+  <label for="address">Address</label>
+  <textarea class="form-control" name="Address" id="Address"></textarea>
+  </div>
+  <br>
 
-<label for="sem">Sem</label>
-<input type="number" class="form-control" name="sem" id="sem">
-</div>
-<br>
-<div class="form-group">                          
-<select  class="form-control" id="gender" name="gender"  required>
-        <option selected>Select Gender</option>
-    
-        <option value="male">Male</option>
-        <option value="female">Female</option>
-       
-      </select>
- </div>
-<br>
-
-<div class="form-group">                          
-<select class="form-control" id="branch" name="branch"  required>
-        <option selected>Select Branch</option>
-        {% for d in dept  %}
-        <option value="{{d.branch}}">{{d.branch}}</option>
-        {% endfor %}
-      </select>
- </div>
-<br>
-<div class="form-group">
-
-<label for="email">Email</label>
-<input type="email" class="form-control" name="email" id="email">
-</div>
-<br>
 <div class="form-group">
 <label for="num">Phone Number</label>
-<input type="number" class="form-control" name="num" id="num">
+<input type="number" class="form-control" name="Phone_No" id="Phone_No">
 </div>
 <br>
 
-<div class="form-group">
-<label for="address">Address</label>
-<textarea class="form-control" name="address" id="address"></textarea>
-</div>
-<br>
   
   <button type="submit" class="btn btn-danger btn-sm btn-block">Add Record</button>
 </form>
