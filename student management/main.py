@@ -18,8 +18,8 @@ login_manager=LoginManager(app)
 login_manager.login_view='login'
 
 @login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+def load_user(user_S_ID):
+    return Salesman.query.get(int(user_S_ID))
 
 
 
@@ -59,13 +59,14 @@ class Product(db.Model):
     Price = id=db.Column(db.Integer)
 
 
-class Salesman(db.Model):
-    S_ID = db.Column(db.Integer, primary_key=True)
+class Salesman(UserMixin,db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     Name = db.Column(db.String(100))
     Phone_No = db.Column(db.Integer)
-    Email=db.Column(db.String(100))
+    Email=db.Column(db.String(100),unique=True)
     Position=db.Column(db.String(100))
     Territory=db.Column(db.String(100))
+    password=db.Column(db.String(1000))
 
 
     # Define other attributes for the Salesman table
@@ -86,13 +87,13 @@ class Trig(db.Model):
     action=db.Column(db.String(100))
     timestamp=db.Column(db.String(100))
 
-
+'''
 class User(UserMixin,db.Model):
     id=db.Column(db.Integer,primary_key=True)
     username=db.Column(db.String(50))
     email=db.Column(db.String(50),unique=True)
     password=db.Column(db.String(1000))
-
+'''
 
 
 
@@ -204,10 +205,14 @@ def edit(Cust_ID):
 @app.route('/signup',methods=['POST','GET'])
 def signup():
     if request.method == "POST":
-        username=request.form.get('username')
-        email=request.form.get('email')
+        Name=request.form.get('Name')
+        Email=request.form.get('Email')
+        Phone_No = request.form.get("Phone_No")
+        Position = request.form.get("Position")
+        Territory = request.form.get("Territory")
         password=request.form.get('password')
-        user=User.query.filter_by(email=email).first()
+
+        user=Salesman.query.filter_by(Email=Email).first()
         if user:
             flash("Email Already Exist","warning")
             return render_template('/signup.html')
@@ -216,7 +221,7 @@ def signup():
         # new_user=db.engine.execute(f"INSERT INTO `user` (`username`,`email`,`password`) VALUES ('{username}','{email}','{encpassword}')")
 
         # this is method 2 to save data in db
-        newuser=User(username=username,email=email,password=encpassword)
+        newuser=Salesman(Name=Name,Phone_No = Phone_No,Email=Email,Position=Position,Territory=Territory, password=encpassword)
         db.session.add(newuser)
         db.session.commit()
         flash("Signup Succes Please Login","success")
@@ -229,9 +234,9 @@ def signup():
 @app.route('/login',methods=['POST','GET'])
 def login():
     if request.method == "POST":
-        email=request.form.get('email')
+        Email=request.form.get('Email')
         password=request.form.get('password')
-        user=User.query.filter_by(email=email).first()
+        user=Salesman.query.filter_by(Email=Email).first()
 
         if user and check_password_hash(user.password,password):
             login_user(user)
