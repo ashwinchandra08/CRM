@@ -38,9 +38,9 @@
           <li class="{% block home %}
           {% endblock home %}"><a href="/">Home</a></li>
          
- <li><a href="/addstudent">Customer</a></li>
+ <li><a href="/addcustomer">Customer</a></li>
  <li><a href="/addattendance">Attendance</a></li>
- <li><a href="/department">Department</a></li>
+ <li><a href="/complaints">Customer Complaints</a></li>
  <li><a href="/triggers">Records</a></li>
  <li><a href="/studentdetails">Customer Details</a></li>
  <li><a href="/search">Search</a></li>
@@ -63,12 +63,14 @@
   </header><!-- End Header -->
 
   <!-- ======= Intro Section ======= -->
- <section id="intro">
+  {% if request.path == '/' %}
+
+  <section id="intro">
     <div class="intro-container" data-aos="zoom-in" data-aos-delay="100">
       <h1 class="mb-4 pb-0">CUSTOMER RELATIONSHIP MANAGEMENT SYSTEM </span> </h1>
       <p class="mb-4 pb-0">DBMS Mini Project Using Flask & MYSQL</p>
     </div>
-  </section><!-- End Intro Section -->
+  </section>{% endif %}
   <main id="main">
 
 

@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request,session,redirect,url_for,flash
+from flask import Flask,render_template,request,session,redirect,url_for,flash,jsonify  
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String, Date,ForeignKey,Float
 from flask_login import UserMixin
@@ -127,20 +127,27 @@ def triggers():
     query=Trig.query.all()
     return render_template('triggers.html',query=query)
 '''
-
-@app.route('/product',methods=['POST','GET'])
+'''
+@app.route('/complaints',methods=['POST','GET'])
 def department():
     if request.method=="POST":
         dept=request.form.get('dept')
         query=Product.query.filter_by(branch=dept).first()
         if query:
             flash("Product Already Exist","warning")
-            return redirect('/product')
+            return redirect('/complaints')
         dep=Product(branch=dept)
         db.session.add(dep)
         db.session.commit()
         flash("Product Added","success")
     return render_template('department.html')
+'''
+@app.route('/complaints',methods=['POST','GET'])
+def complaints():
+    query=Complaint.query.all() 
+    return render_template('complaint.html',query=query)
+
+
 
 @app.route('/addtransaction',methods=['POST','GET'])
 def Transaction():
@@ -175,7 +182,7 @@ def delete(Cust_ID):
     db.session.delete(post)
     db.session.commit()
     # db.engine.execute(f"DELETE FROM `student` WHERE `student`.`id`={id}")
-    flash("Slot Deleted Successful","danger")
+    flash("Customer Deleted Successfully","danger")
     return redirect('/studentdetails')
 
 
@@ -201,6 +208,18 @@ def edit(Cust_ID):
     posts=Customer.query.filter_by(Cust_ID=Cust_ID).first()
     return render_template('edit.html',posts=posts,dept=dept)
 
+@app.route("/editstatus/<string:Cust_ID>",methods=['POST','GET'])
+@login_required
+def editstatus(Cust_ID):
+    if request.method == "POST":
+        Current_Status = request.form.get('Current_Status')
+        post = Customer.query.filter_by(Cust_ID=Cust_ID).first()
+        post.Current_Status = Current_Status
+        db.session.commit()
+        flash("Status is updated", "success")
+        return redirect('/studentdetails')
+        # Send the updated status back to the clien
+
 
 @app.route('/signup',methods=['POST','GET'])
 def signup():
@@ -211,12 +230,12 @@ def signup():
         Position = request.form.get("Position")
         Territory = request.form.get("Territory")
         password=request.form.get('password')
+        encpassword=generate_password_hash(password)
 
         user=Salesman.query.filter_by(Email=Email).first()
         if user:
-            flash("Email Already Exist","warning")
+            flash("Email Already Exists","warning")
             return render_template('/signup.html')
-        encpassword=generate_password_hash(password)
 
         # new_user=db.engine.execute(f"INSERT INTO `user` (`username`,`email`,`password`) VALUES ('{username}','{email}','{encpassword}')")
 
@@ -252,12 +271,12 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash("Logout SuccessFul","warning")
+    #flash("Logout Successul","warning")
     return redirect(url_for('login'))
 
 
 
-@app.route('/addstudent',methods=['POST','GET'])
+@app.route('/addcustomer',methods=['POST','GET'])
 @login_required
 def addstudent():
     # dept=db.engine.execute("SELECT * FROM `department`")
@@ -272,7 +291,7 @@ def addstudent():
         db.session.add(query)
         db.session.commit()
 
-        flash("Booking Confirmed","info")
+        flash("Customer Added","info")
 
 
     return render_template('student.html',dept=dept)

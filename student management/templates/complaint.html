@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Complaints
+{% endblock title %}
+
+{% block body %}
+<h3 class="text-center"><span>Customer Complaints</span> </h3>
+
+{% with messages=get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+
+<div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
+    {{message}}
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+<br>
+
+<table class="table">
+  <thead class="thead-light">
+    <tr>
+      <th scope="col">CUSTOMER_ID</th>
+      <th scope="col">Details</th>
+      <th scope="col">Date</th>
+      <th scope="col">Transaction_ID</th>
+      <th scope="col">Current_Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for post in query %}
+    <tr>
+      <th scope="row"><a href="/studentdetails">{{post.Cust_ID}}</a></th>
+      <td>{{post.Details}}</td>
+      <td>{{post.Date}}</td>
+      <td>{{post.Transaction_ID}}</td>
+      <td>
+        <form action="/editstatus/{{post.Cust_ID}}" method="post">
+          <select name="Current_Status" id="status" class="form-control">
+            <option value="PENDING" {% if post.Current_Status == 'PENDING' %} selected {% endif %}>PENDING</option>
+            <option value="COMPLETE" {% if post.Current_Status == 'COMPLETE' %} selected {% endif %}>COMPLETE</option>
+          </select>
+          <button type="submit" class="btn btn-primary">Update Status</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock body %}
