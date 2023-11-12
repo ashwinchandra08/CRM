@@ -1,11 +1,12 @@
 from flask import Flask,render_template,request,session,redirect,url_for,flash,jsonify  
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, String, Date,ForeignKey,Float
+from sqlalchemy import Column, Integer, String, Date,ForeignKey,Float,text
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash,check_password_hash
 from flask_login import login_user,logout_user,login_manager,LoginManager
 from flask_login import login_required,current_user
 import json
+import hashlib
 
 # MY db connection
 local_server= True
@@ -24,7 +25,7 @@ def load_user(user_S_ID):
 
 
 # app.config['SQLALCHEMY_DATABASE_URL']='mysql://username:password@localhost/databas_table_name'
-app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:@localhost/project'
+app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:ananya123@localhost/projectcrm?unix_socket=/var/lib/mysql/mysql.sock'
 db=SQLAlchemy(app)
 
 # here we will create db models that is tables
@@ -44,7 +45,7 @@ class Complaint(db.Model):
     Current_Status = db.Column(db.String(100))
 
 class Customer(db.Model):
-    Cust_ID = db.Column(db.Integer, primary_key=True)
+    Cust_ID = db.Column(db.Integer, primary_key=True,autoincrement=True,default=0)
     Name=db.Column(db.String(100))
     Address = db.Column(db.String(100))
     Phone_No = db.Column(db.Integer)
@@ -60,13 +61,15 @@ class Product(db.Model):
 
 
 class Salesman(UserMixin,db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    S_ID = db.Column(db.Integer, primary_key=True)
     Name = db.Column(db.String(100))
     Phone_No = db.Column(db.Integer)
     Email=db.Column(db.String(100),unique=True)
     Position=db.Column(db.String(100))
     Territory=db.Column(db.String(100))
     password=db.Column(db.String(1000))
+    def get_id(self):
+        return str(self.S_ID)
 
 
     # Define other attributes for the Salesman table
@@ -116,8 +119,8 @@ def index():
 
 @app.route('/studentdetails')
 def studentdetails():
-    # query=db.engine.execute(f"SELECT * FROM `student`") 
-    query=Customer.query.all() 
+    query=db.session.execute(text("CALL GetAllCustomers();") )
+    #query=Customer.query.all() 
     return render_template('studentdetails.html',query=query)
 
 '''
@@ -160,20 +163,45 @@ def Transaction():
         atte=Transaction(rollno=rollno,attendance=attend)
         db.session.add(atte)
         db.session.commit()
-        flash("Attendance added","warning")
+        flash("Transaction added","warning")
 
         
     return render_template('attendance.html',query=query)
 
 @app.route('/search',methods=['POST','GET'])
+
+
+
 def search():
-    if request.method=="POST":
-        rollno=request.form.get('roll')
-        bio=Customer.query.filter_by(rollno=rollno).first()
-        attend=Transaction.query.filter_by(rollno=rollno).first()
-        return render_template('search.html',bio=bio,attend=attend)
-        
+    if request.method == "POST":
+        Cust_ID = request.form.get('Cust_ID')
+        if Cust_ID==0:
+            return redirect('/studentdetails')
+        try:
+            # Use SQLAlchemy Session to execute the stored procedure GetCustomerDetails
+            with db.session.begin() as session:
+                # Use text construct to represent the SQL expression
+                query = db.session.execute(text("CALL GetCustomerDetails(:Cust_ID)"), {"Cust_ID": Cust_ID})
+
+                # Fetch the result set
+                customer = query.fetchone()
+
+                if customer is None:
+                    flash("No customer found with the provided ID", "warning")
+                    return render_template('search.html')
+
+                # Log the result for debugging
+                #current_app.logger.info(f"Retrieved customer details: {customer}")
+
+                return render_template('search.html', customer=customer)
+        except Exception as e:
+            # Log any exceptions for debugging
+            #current_app.logger.error(f"Error retrieving customer details: {e}")
+            flash("An error occurred while retrieving customer details", "danger")
+            raise  # Reraise the exception to see the full traceback in the console
+
     return render_template('search.html')
+
 
 @app.route("/delete/<string:Cust_ID>",methods=['POST','GET'])
 @login_required
@@ -202,7 +230,7 @@ def edit(Cust_ID):
         post.Address=Address
         post.Phone_No=Phone_No
         db.session.commit()
-        flash("Slot is Updates","success")
+        flash("Slot is Updated","success")
         return redirect('/studentdetails')
     dept=Product.query.all()
     posts=Customer.query.filter_by(Cust_ID=Cust_ID).first()
@@ -230,7 +258,7 @@ def signup():
         Position = request.form.get("Position")
         Territory = request.form.get("Territory")
         password=request.form.get('password')
-        encpassword=generate_password_hash(password)
+        #encpassword=hashlib.sha256(password.encode('utf-8')).hexdigest()
 
         user=Salesman.query.filter_by(Email=Email).first()
         if user:
@@ -240,7 +268,7 @@ def signup():
         # new_user=db.engine.execute(f"INSERT INTO `user` (`username`,`email`,`password`) VALUES ('{username}','{email}','{encpassword}')")
 
         # this is method 2 to save data in db
-        newuser=Salesman(Name=Name,Phone_No = Phone_No,Email=Email,Position=Position,Territory=Territory, password=encpassword)
+        newuser=Salesman(Name=Name,Phone_No = Phone_No,Email=Email,Position=Position,Territory=Territory, password=password)
         db.session.add(newuser)
         db.session.commit()
         flash("Signup Succes Please Login","success")
@@ -257,13 +285,14 @@ def login():
         password=request.form.get('password')
         user=Salesman.query.filter_by(Email=Email).first()
 
-        if user and check_password_hash(user.password,password):
+        if user and password:
             login_user(user)
-            flash("Login Success","primary")
+            flash("Login Success", "primary")
             return redirect(url_for('index'))
         else:
-            flash("invalid credentials","danger")
-            return render_template('login.html')    
+            flash("Invalid credentials", "danger")
+            return render_template('login.html')
+ 
 
     return render_template('login.html')
 
