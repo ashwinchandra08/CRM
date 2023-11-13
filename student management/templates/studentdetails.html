@@ -30,6 +30,9 @@ Customer Details
       <th scope="col">CUSTOMER NAME</th>
       <th scope="col">ADDRESS</th>
       <th scope="col">PHONE NUMBER</th>
+      <th scope="col">PRODUCT PURCHASED</th>
+      <th scope="col">BRAND</th>
+      <th scope="col">MODEL</th>
       <th scope="col">EDIT</th>
       <th scope="col">DELETE</th>
 
@@ -39,9 +42,12 @@ Customer Details
   {% for post in query %}
     <tr>
       <th scope="row">{{post.Cust_ID}}</th>
-      <td>{{post.Name}}</td>
-      <td>{{post.Address}}</td>
-      <td>{{post.Phone_No}}</td>
+      <td>{{post.Customer_Name}}</td>
+      <td>{{post.Customer_Address}}</td>
+      <td>{{post.Customer_Phone_No}}</td>
+      <td>{{post.Purchased_Product_Type}}</td>
+      <td>{{post.Brand}}</td>
+      <td>{{post.Model}}</td>
     <td><a href="/edit/{{post.Cust_ID}}"><button class="btn btn-primary">Edit </button> </a> </td>
     <td><a href="/delete/{{post.Cust_ID}}"><button onclick="return confirm('Are you sure to Delete data');" class="btn btn-danger">Delete </button> </a> </td>
     </tr>
