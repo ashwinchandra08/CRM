@@ -216,8 +216,10 @@ def search():
 def delete(Cust_ID):
     post=Customer.query.filter_by(Cust_ID=Cust_ID).first()
     post2 = Transaction.query.filter_by(Cust_ID=Cust_ID).first()
+    post3 = Complaint.query.filter_by(Cust_ID=Cust_ID).first()
     db.session.delete(post)
     db.session.delete(post2)
+    db.session.delete(post3)
     db.session.commit()
     # db.engine.execute(f"DELETE FROM `student` WHERE `student`.`id`={id}")
     flash("Customer Deleted Successfully","danger")
