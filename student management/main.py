@@ -25,7 +25,7 @@ def load_user(user_S_ID):
 
 
 # app.config['SQLALCHEMY_DATABASE_URL']='mysql://username:password@localhost/databas_table_name'
-app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:@localhost/project'
+app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:pacificrim@localhost/project'
 db=SQLAlchemy(app)
 
 # here we will create db models that is tables
@@ -118,7 +118,7 @@ def index():
 @app.route('/studentdetails')
 def studentdetails():
     #query=db.session.execute(text("CALL GetAllCustomers();") )
-    query=db.session.execute(text("SELECT * FROM customer_transaction;") )
+    query=db.session.execute(text("SELECT * FROM customer_transaction_new;") )
     #query=Customer.query.all() 
     return render_template('studentdetails.html',query=query)
 
