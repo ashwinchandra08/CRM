@@ -25,7 +25,7 @@ def load_user(user_S_ID):
 
 
 # app.config['SQLALCHEMY_DATABASE_URL']='mysql://username:password@localhost/databas_table_name'
-app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:ananya123@localhost/projectcrm?unix_socket=/var/lib/mysql/mysql.sock'
+app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:ananya123@localhost/crmnew?unix_socket=/var/lib/mysql/mysql.sock'
 db=SQLAlchemy(app)
 
 # here we will create db models that is tables
@@ -41,11 +41,11 @@ class Complaint(db.Model):
     Cust_ID = db.Column(db.Integer, ForeignKey('customer.Cust_ID'))
     Details = db.Column(db.String(100))
     Date = db.Column(Date)
-    Transaction_ID = db.Column(db.Integer, ForeignKey('transaction.Transaction_ID'))
+    Transaction_ID = db.Column(db.Integer, ForeignKey('transaction.T_ID'))
     Current_Status = db.Column(db.String(100))
 
 class Customer(db.Model):
-    Cust_ID = db.Column(db.Integer, primary_key=True,autoincrement=True,default=0)
+    Cust_ID = db.Column(db.Integer, primary_key=True,autoincrement=True,default=1)
     Name=db.Column(db.String(100))
     Address = db.Column(db.String(100))
     Phone_No = db.Column(db.Integer)
@@ -53,7 +53,7 @@ class Customer(db.Model):
 
 class Product(db.Model):
     Prod_ID = db.Column(db.Integer, primary_key=True)
-    Name = db.Column(db.String(100))
+    Type = db.Column(db.String(100))
     Details = db.Column(db.String(100))
     Brand = db.Column(db.String(100))
     Model = db.Column(db.String(100))
@@ -76,20 +76,21 @@ class Salesman(UserMixin,db.Model):
 
 class Transaction(db.Model):
     T_ID = db.Column(db.Integer, primary_key=True)
-    Prod_ID = db.Column(db.Integer,ForeignKey('Product.Prod_ID'))
+    Prod_ID = db.Column(db.Integer,ForeignKey('product.Prod_ID'))
     Cust_ID = db.Column(db.Integer, ForeignKey('customer.Cust_ID'))
     Date = db.Column(Date)
-    S_ID = db.Column(db.Integer, ForeignKey('Salesman.S_ID'))
+    S_ID = db.Column(db.Integer, ForeignKey('salesman.S_ID'))
     Quantity = db.Column(db.Integer)
     Amount = db.Column(db.Float)
+    #product = db.relationship('Product', backref='transactions')
     # Define attributes for the Transaction table
-
+'''
 class Trig(db.Model):
     tid=db.Column(db.Integer,primary_key=True)
     rollno=db.Column(db.String(100))
     action=db.Column(db.String(100))
     timestamp=db.Column(db.String(100))
-
+'''
 '''
 class User(UserMixin,db.Model):
     id=db.Column(db.Integer,primary_key=True)
@@ -119,7 +120,8 @@ def index():
 
 @app.route('/studentdetails')
 def studentdetails():
-    query=db.session.execute(text("CALL GetAllCustomers();") )
+    #query=db.session.execute(text("CALL GetAllCustomers();") )
+    query=db.session.execute(text("SELECT * FROM customer_transaction_new;") )
     #query=Customer.query.all() 
     return render_template('studentdetails.html',query=query)
 
@@ -151,7 +153,7 @@ def complaints():
     return render_template('complaint.html',query=query)
 
 
-
+'''
 @app.route('/addtransaction',methods=['POST','GET'])
 def Transaction():
     # query=db.engine.execute(f"SELECT * FROM `student`") 
@@ -167,40 +169,30 @@ def Transaction():
 
         
     return render_template('attendance.html',query=query)
+'''
 
 @app.route('/search',methods=['POST','GET'])
 
 
-
 def search():
     if request.method == "POST":
-        Cust_ID = request.form.get('Cust_ID')
-        if Cust_ID==0:
-            return redirect('/studentdetails')
+        Brand = request.form.get('Brand')
         try:
-            # Use SQLAlchemy Session to execute the stored procedure GetCustomerDetails
             with db.session.begin() as session:
-                # Use text construct to represent the SQL expression
-                query = db.session.execute(text("CALL GetCustomerDetails(:Cust_ID)"), {"Cust_ID": Cust_ID})
-
-                # Fetch the result set
-                customer = query.fetchone()
-
-                if customer is None:
-                    flash("No customer found with the provided ID", "warning")
-                    return render_template('search.html')
-
-                # Log the result for debugging
-                #current_app.logger.info(f"Retrieved customer details: {customer}")
-
-                return render_template('search.html', customer=customer)
+                query = db.session.execute(
+                    text("CALL GetProductComplaintByBrand(:Brand)"), {"Brand": Brand}
+                )
+                products_and_complaints = query.fetchall()
+                print("Products and Complaints:", products_and_complaints)
+                if not products_and_complaints:
+                    flash(f"No products found for the brand: {Brand}", "warning")
+                return render_template('search.html', products_and_complaints=products_and_complaints)
         except Exception as e:
-            # Log any exceptions for debugging
-            #current_app.logger.error(f"Error retrieving customer details: {e}")
-            flash("An error occurred while retrieving customer details", "danger")
-            raise  # Reraise the exception to see the full traceback in the console
-
+            print("Error:", e)
+            flash("An error occurred while retrieving data", "danger")
     return render_template('search.html')
+
+
 
 
 @app.route("/delete/<string:Cust_ID>",methods=['POST','GET'])
@@ -241,11 +233,11 @@ def edit(Cust_ID):
 def editstatus(Cust_ID):
     if request.method == "POST":
         Current_Status = request.form.get('Current_Status')
-        post = Customer.query.filter_by(Cust_ID=Cust_ID).first()
+        post = Complaint.query.filter_by(Cust_ID=Cust_ID).first()
         post.Current_Status = Current_Status
         db.session.commit()
         flash("Status is updated", "success")
-        return redirect('/studentdetails')
+        return redirect('/complaints')
         # Send the updated status back to the clien
 
 
@@ -304,7 +296,7 @@ def logout():
     return redirect(url_for('login'))
 
 
-
+'''
 @app.route('/addcustomer',methods=['POST','GET'])
 @login_required
 def addstudent():
@@ -324,6 +316,105 @@ def addstudent():
 
 
     return render_template('student.html',dept=dept)
+
+'''
+'''
+@app.route('/addcustomer', methods=['POST', 'GET'])
+@login_required
+def addstudent():
+    # Retrieve the last Cust_ID from the database
+    last_customer = Customer.query.order_by(Customer.Cust_ID.desc()).first()
+    # Set the initial Cust_ID to 1 if there are no existing customers
+    if last_customer:
+        initial_cust_id = last_customer.Cust_ID + 1
+    else:
+        initial_cust_id = 1
+    dept = Product.query.all()
+    if request.method == "POST":
+        # Increment the Cust_ID for the new customer
+        Cust_ID = initial_cust_id
+        Name = request.form.get('Name')
+        Address = request.form.get('Address')
+        Phone_No = request.form.get('Phone_No')
+        # Create and add the new customer to the database
+        new_customer = Customer(Cust_ID=Cust_ID, Name=Name, Address=Address, Phone_No=Phone_No)
+        db.session.add(new_customer)
+        db.session.commit()
+        flash("Customer Added", "info")
+    return render_template('student.html', dept=dept)
+
+'''
+
+
+@app.route('/addcustomer', methods=['POST', 'GET'])
+@login_required
+def add_customer():
+    if request.method == "POST":
+        # Retrieve the last Cust_ID from the database
+        last_customer = Customer.query.order_by(Customer.Cust_ID.desc()).first()
+        # Set the initial Cust_ID to 1 if there are no existing customers
+        if last_customer:
+            initial_cust_id = last_customer.Cust_ID + 1
+        else:
+            initial_cust_id = 1
+
+        # Increment the Cust_ID for the new customer
+        cust_id = initial_cust_id
+        name = request.form.get('Name')
+        address = request.form.get('Address')
+        phone_no = request.form.get('Phone_No')
+
+        # Create and add the new customer to the database
+        new_customer = Customer(Cust_ID=cust_id, Name=name, Address=address, Phone_No=phone_no)
+        db.session.add(new_customer)
+        db.session.commit()
+
+        # Get product details from the form
+        prod_brand = request.form.get('Product_Brand')
+        prod_model = request.form.get('Product_Model')
+        prod_price = float(request.form.get('Displayed_Price'))  # Convert to float for calculations
+
+        # Retrieve the selected product from the database
+        selected_product = Product.query.filter_by(Brand=prod_brand, Model=prod_model, Price=prod_price).first()
+
+        if not selected_product:
+            flash("Selected product does not exist. Please choose a valid product.", "danger")
+            return redirect('/addcustomer')
+
+        # Retrieve the last T_ID from the database
+        last_transaction = Transaction.query.order_by(Transaction.T_ID.desc()).first()
+        # Set the initial T_ID to 1 if there are no existing transactions
+        if last_transaction:
+            initial_t_id = last_transaction.T_ID + 1
+        else:
+            initial_t_id = 1
+
+        # Get additional transaction details from the form
+        prod_id = selected_product.Prod_ID
+        s_id = selected_product.S_ID  # Assuming S_ID is associated with the selected product
+        quantity = int(request.form.get('Quantity'))  # Convert to int for storage
+        amount = prod_price * quantity
+
+        # Create and add the new transaction to the database
+        new_transaction = Transaction(T_ID=initial_t_id, Prod_ID=prod_id, Cust_ID=cust_id,
+                                      S_ID=s_id, Quantity=quantity, Amount=amount)
+        db.session.add(new_transaction)
+        db.session.commit()
+
+        flash("Customer, Product, and Transaction Added", "info")
+
+    # Retrieve the products for rendering the template
+    products = Product.query.all()
+    return render_template('student.html', products=products)
+
+   
+
+
+
+
+
+
+
 @app.route('/test')
 def test():
     try:

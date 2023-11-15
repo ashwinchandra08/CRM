@@ -3,63 +3,86 @@
 Add Customers
 {% endblock title %}
 
-
-
 {% block body %}
- <h3 class="text-center"><span>Add Customer Details</span> </h3>
-  
-{% with messages=get_flashed_messages(with_categories=true) %}
-{% if messages %}
-{% for category, message in messages %}
+    <h3 class="text-center"><span>Add Customer Details</span></h3>
 
-<div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
-    {{message}}
+    {% with messages=get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
+                    {{message}}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <br>
 
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <form action="/addcustomer" method="post">
+                    <div class="form-group">
+                        <label for="Name">Customer Name</label>
+                        <input type="text" class="form-control" name="Name" id="Name" required>
+                    </div>
+                    <br>
 
-</div>
-  {% endfor %}
-  {% endif %}
-  {% endwith %}
-<br>
-<div class="container">
+                    <div class="form-group">
+                        <label for="Address">Address</label>
+                        <textarea class="form-control" name="Address" id="Address" required></textarea>
+                    </div>
+                    <br>
 
-<div class="row">
+                    <div class="form-group">
+                        <label for="Phone_No">Phone Number</label>
+                        <input type="number" class="form-control" name="Phone_No" id="Phone_No" required>
+                    </div>
+                    <br>
 
-<div class="col-md-4"></div>
-<div class="col-md-4">
+                    <!-- Dropdown for selecting existing products -->
+                    <div class="form-group">
+                        <label for="existing_product">Select Existing Product</label>
+                        <select class="form-control" name="existing_product" id="existing_product" onchange="updatePrice()">
+                            {% for product in products %}
+                                <option value="{{ product.Prod_ID }}" data-price="{{ product.Price }}">{{ product.Brand }} - {{ product.Model }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <br>
 
-<form action="/addcustomer" method="post">
-<div class="form-group">
+                    <!-- Displayed Price -->
+                    <div class="form-group">
+                        <label for="displayed_price">Product Price</label>
+                        <input type="text" class="form-control" id="prod_price" readonly>
+                    </div>
+                    <br>
 
-<label for="sname">Customer Name</label>
-<input type="text" class="form-control" name="Name" id="Name">
-</div>
-<br>
+                    <!-- Additional fields for transaction details -->
+                    <div class="form-group">
+                        <label for="Quantity">Quantity</label>
+                        <input type="number" class="form-control" name="Quantity" id="Quantity" required>
+                    </div>
+                    <br>
 
-<div class="form-group">
-  <label for="address">Address</label>
-  <textarea class="form-control" name="Address" id="Address"></textarea>
-  </div>
-<br>
+                    <button type="submit" class="btn btn-danger btn-sm btn-block">Add Record</button>
+                </form>
+                <br>
+                <br>
+            </div>
 
-<div class="form-group">
-<label for="num">Phone Number</label>
-<input type="number" class="form-control" name="Phone_No" id="Phone_No">
-</div>
-<br>
-<br>
-  
-  <button type="submit" class="btn btn-danger btn-sm btn-block">Add Record</button>
-</form>
-<br>
-<br>
+            <div class="col-md-4"></div>
+        </div>
+    </div>
 
-</div>
-
-<div class="col-md-4"></div>
-
-</div></div>
-
-
-
+    <!-- JavaScript to update the displayed price -->
+    <script>
+        function updatePrice() {
+            var select = document.getElementById("existing_product");
+            var priceField = document.getElementById("displayed_price");
+            var selectedOption = select.options[select.selectedIndex];
+            var price = selectedOption.getAttribute("data-price");
+            priceField.value = price;
+        }
+    </script>
 {% endblock body %}

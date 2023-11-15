@@ -32,12 +32,12 @@ Complaints
   <tbody>
     {% for post in query %}
     <tr>
-      <th scope="row"><a href="/studentdetails">{{post.Cust_ID}}</a></th>
+      <th scope="row"><a href="/complaints">{{post.Cust_ID}}</a></th>
       <td>{{post.Details}}</td>
       <td>{{post.Date}}</td>
       <td>{{post.Transaction_ID}}</td>
       <td>
-        <form action="/editstatus/{{post.Cust_ID}}" method="post">
+        <form action="{{ url_for('editstatus', Cust_ID=post.Cust_ID) }}" method="post">
           <select name="Current_Status" id="status" class="form-control">
             <option value="PENDING" {% if post.Current_Status == 'PENDING' %} selected {% endif %}>PENDING</option>
             <option value="COMPLETE" {% if post.Current_Status == 'COMPLETE' %} selected {% endif %}>COMPLETE</option>
