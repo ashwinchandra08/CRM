@@ -10,7 +10,7 @@
 
     <title>Edit</title>
   </head>
-<body class="bg-danger">
+<body class="bg-white">
 
 
  <h3 class="text-center"><span>Edit Customer Details</span> </h3>
@@ -38,10 +38,6 @@
 <form action="/edit/{{posts.Cust_ID}}" method="post">
 <div class="form-group">
 <div class="form-group">
-    <label for="Cust_ID">Cust_ID</label>
-    <input type="number" class="form-control" name="Cust_ID" id="Cust_ID" value={{posts.Cust_ID}} >
-    </div>
-    <br>
 
 <label for="Name">Customer Name</label>
 <input type="text" class="form-control" name="Name" id="Name" value={{posts.Name}} >

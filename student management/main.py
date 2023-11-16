@@ -115,7 +115,7 @@ class Student(db.Model):
 def index(): 
     return render_template('index.html')
 
-@app.route('/studentdetails')
+@app.route('/customerdetails')
 def studentdetails():
     #query=db.session.execute(text("CALL GetAllCustomers();") )
     query=db.session.execute(text("SELECT * FROM customer_transaction_new;") )
@@ -216,21 +216,21 @@ def delete(Cust_ID):
 @app.route("/edit/<string:Cust_ID>",methods=['POST','GET'])
 @login_required
 def edit(Cust_ID):
-    # dept=db.engine.execute("SELECT * FROM `department`")    
+    # dept=db.engine.execute("SELECT * FROM department")    
     if request.method=="POST":
-        Cust_ID=request.form.get('Cust_ID')
+        #Cust_ID=request.form.get('Cust_ID')
         Name=request.form.get('Name')
         Address=request.form.get('Address')
         Phone_No=request.form.get('Phone_No')
-        # query=db.engine.execute(f"UPDATE `student` SET `rollno`='{rollno}',`sname`='{sname}',`sem`='{sem}',`gender`='{gender}',`branch`='{branch}',`email`='{email}',`number`='{num}',`address`='{address}'")
+        # query=db.engine.execute(f"UPDATE student SET rollno='{rollno}',sname='{sname}',sem='{sem}',gender='{gender}',branch='{branch}',email='{email}',number='{num}',address='{address}'")
         post=Customer.query.filter_by(Cust_ID=Cust_ID).first()
-        post.Cust_ID=Cust_ID
+        #post.Cust_ID=Cust_ID
         post.Name=Name
         post.Address=Address
         post.Phone_No=Phone_No
         db.session.commit()
-        flash("Slot is Updates","success")
-        return redirect('/studentdetails')
+        flash("Slot is Updated","success")
+        return redirect('/customerdetails')
     dept=Product.query.all()
     posts=Customer.query.filter_by(Cust_ID=Cust_ID).first()
     return render_template('edit.html',posts=posts,dept=dept)
