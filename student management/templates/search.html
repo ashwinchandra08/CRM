@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% block title %}
 Search
 {% endblock title %}
@@ -24,8 +25,8 @@ Search
                       <br>
                       <br>
                       <br>
-                    <!--label for="cust_id">Enter Customer ID</label>-->
-                        <input type="text" class="form-control" name="Cust_ID" id="cust_id" placeholder="Enter Customer ID" required>
+                    <!--label for="brand">Enter Product Brand</label>-->
+                        <input type="text" class="form-control" name="Brand" id="brand" placeholder="Enter Product Brand" required>
                     </div>
                     <br>
                     <button type="submit" class="btn btn-danger btn-sm btn-block">Search</button>
@@ -34,19 +35,34 @@ Search
                 <br>
             </div>
             <div class="col-md-8">
-                {% if customer %}
+                {% if products_and_complaints %}
                     <br>
                     <br>
                     <br>
-                    <h3>Customer Details</h3>
+                    <h3>Product Details</h3>
                     <hr>
-                    <li>Customer ID: {{ customer.Cust_ID }}</li>
-                    <li>Name: {{ customer.Name }}</li>
-                    <li>Address: {{ customer.Address }}</li>
-                    <li>Phone No: {{ customer.Phone_No }}</li>
-                    <hr>
+                    <p>Number of results: {{ products_and_complaints|length }}</p>
+
+                    {% for result in products_and_complaints %}
+                        
+                        <li>Product ID: {{ result[0] }}</li>
+                        <li>Type: {{ result[1] }}</li>
+                        <li>Details: {{ result[2] }}</li>
+                        <li>Brand: {{ result[3] }}</li>
+                        <li>Model: {{ result[4] }}</li>
+                        <li>Price: {{ result[5] }}</li>
+                        <hr>
+                        <h3>Complaint Details</h3>
+                        <hr>
+                        <!--<li>Complaint ID: {{ result[] }}</li>-->
+                        <li>Details: {{ result[6] }}</li>
+                        <li>Date: {{ result[7] }}</li>
+                        <li>Current Status: {{ result[8] }}</li>
+                        <hr>
+                    {% endfor %}
                 {% else %}
-                    
+                    <!-- Handle case when there are no search results -->
+                    <!--<p>No products found with the provided brand name.</p>-->
                 {% endif %}
             </div>
         </div>

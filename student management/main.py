@@ -179,36 +179,23 @@ def Transaction_2():
         
     return render_template('attendance.html',query=query)
 
-@app.route('/search',methods=['POST','GET'])
-
+@app.route('/search', methods=['POST', 'GET'])
 def search():
     if request.method == "POST":
-        Cust_ID = request.form.get('Cust_ID')
-        if Cust_ID==0:
-            return redirect('/studentdetails')
+        Brand = request.form.get('Brand')
         try:
-            # Use SQLAlchemy Session to execute the stored procedure GetCustomerDetails
             with db.session.begin() as session:
-                # Use text construct to represent the SQL expression
-                query = db.session.execute(text("CALL GetCustomerDetails(:Cust_ID)"), {"Cust_ID": Cust_ID})
-
-                # Fetch the result set
-                customer = query.fetchone()
-
-                if customer is None:
-                    flash("No customer found with the provided ID", "warning")
-                    return render_template('search.html')
-
-                # Log the result for debugging
-                #current_app.logger.info(f"Retrieved customer details: {customer}")
-
-                return render_template('search.html', customer=customer)
+                query = db.session.execute(
+                    text("CALL GetProductComplaintByBrand(:Brand)"), {"Brand": Brand}
+                )
+                products_and_complaints = query.fetchall()
+                print("Products and Complaints:", products_and_complaints)
+                if not products_and_complaints:
+                    flash(f"No products found for the brand: {Brand}", "warning")
+                return render_template('search.html', products_and_complaints=products_and_complaints)
         except Exception as e:
-            # Log any exceptions for debugging
-            #current_app.logger.error(f"Error retrieving customer details: {e}")
-            flash("An error occurred while retrieving customer details", "danger")
-            raise  # Reraise the exception to see the full traceback in the console
-
+            print("Error:", e)
+            flash("An error occurred while retrieving data", "danger")
     return render_template('search.html')
 
 @app.route("/delete/<string:Cust_ID>",methods=['POST','GET'])
