@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}
-Add Customers
+    Add Customers
 {% endblock title %}
 
 {% block body %}
@@ -43,22 +43,30 @@ Add Customers
                     <!-- Dropdown for selecting existing products -->
                     <div class="form-group">
                         <label for="existing_product">Select Existing Product</label>
-                        <select class="form-control" name="existing_product" id="existing_product" onchange="updatePrice()">
+                        <select class="form-control" name="existing_product" id="existing_product">
+                            <option value="" disabled selected>Choose Product</option>
                             {% for product in products %}
                                 <option value="{{ product.Prod_ID }}" data-price="{{ product.Price }}">{{ product.Brand }} - {{ product.Model }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <br>
+                    
 
-                    <!-- Displayed Price -->
+
+                    <!-- Additional fields for transaction details -->
+                    <!-- Additional fields for transaction details -->
+                    
+
+                   <!-- Additional fields for transaction details -->
                     <div class="form-group">
-                        <label for="displayed_price">Product Price</label>
-                        <input type="text" class="form-control" id="prod_price" readonly>
+                        <label for="displayed_price">Displayed Price</label>
+                        <input type="hidden" name="displayed_price" id="displayed_price">
+                        <input type="hidden" name="selected_product_price" id="selected_product_price">
+
                     </div>
                     <br>
 
-                    <!-- Additional fields for transaction details -->
+
                     <div class="form-group">
                         <label for="Quantity">Quantity</label>
                         <input type="number" class="form-control" name="Quantity" id="Quantity" required>
@@ -74,15 +82,16 @@ Add Customers
             <div class="col-md-4"></div>
         </div>
     </div>
-
-    <!-- JavaScript to update the displayed price -->
     <script>
-        function updatePrice() {
-            var select = document.getElementById("existing_product");
-            var priceField = document.getElementById("displayed_price");
-            var selectedOption = select.options[select.selectedIndex];
-            var price = selectedOption.getAttribute("data-price");
-            priceField.value = price;
-        }
-    </script>
+    // Update the displayed price and hidden input when a product is selected
+    document.getElementById('existing_product').addEventListener('change', function () {
+        var selectedOption = this.options[this.selectedIndex];
+        var displayedPriceInput = document.getElementById('displayed_price');
+        var hiddenPriceInput = document.getElementById('selected_product_price');
+
+        displayedPriceInput.value = selectedOption.getAttribute('data-price');
+        hiddenPriceInput.value = selectedOption.getAttribute('data-price');
+    });
+</script>
+    
 {% endblock body %}

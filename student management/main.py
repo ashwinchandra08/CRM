@@ -5,6 +5,7 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash,check_password_hash
 from flask_login import login_user,logout_user,login_manager,LoginManager
 from flask_login import login_required,current_user
+from sqlalchemy.orm import exc
 import json
 import hashlib
 
@@ -45,7 +46,7 @@ class Complaint(db.Model):
     Current_Status = db.Column(db.String(100))
 
 class Customer(db.Model):
-    Cust_ID = db.Column(db.Integer, primary_key=True,autoincrement=True,default=1)
+    Cust_ID = db.Column(db.Integer, primary_key=True,autoincrement=True)
     Name=db.Column(db.String(100))
     Address = db.Column(db.String(100))
     Phone_No = db.Column(db.Integer)
@@ -57,11 +58,12 @@ class Product(db.Model):
     Details = db.Column(db.String(100))
     Brand = db.Column(db.String(100))
     Model = db.Column(db.String(100))
-    Price = id=db.Column(db.Integer)
+    Price = db.Column(db.Float)  # Ensure this is a float column
+
 
 
 class Salesman(UserMixin,db.Model):
-    S_ID = db.Column(db.Integer, primary_key=True)
+    S_ID = db.Column(db.Integer, primary_key=True,autoincrement=True)
     Name = db.Column(db.String(100))
     Phone_No = db.Column(db.Integer)
     Email=db.Column(db.String(100),unique=True)
@@ -75,11 +77,11 @@ class Salesman(UserMixin,db.Model):
     # Define other attributes for the Salesman table
 
 class Transaction(db.Model):
-    T_ID = db.Column(db.Integer, primary_key=True)
+    T_ID = db.Column(db.Integer, primary_key=True,autoincrement=True)
     Prod_ID = db.Column(db.Integer,ForeignKey('product.Prod_ID'))
     Cust_ID = db.Column(db.Integer, ForeignKey('customer.Cust_ID'))
     Date = db.Column(Date)
-    S_ID = db.Column(db.Integer, ForeignKey('salesman.S_ID'))
+    #S_ID = db.Column(db.Integer, ForeignKey('salesman.S_ID'))
     Quantity = db.Column(db.Integer)
     Amount = db.Column(db.Float)
     #product = db.relationship('Product', backref='transactions')
@@ -185,7 +187,7 @@ def search():
                 products_and_complaints = query.fetchall()
                 print("Products and Complaints:", products_and_complaints)
                 if not products_and_complaints:
-                    flash(f"No products found for the brand: {Brand}", "warning")
+                    flash(f"No complaints found for the brand: {Brand}", "warning")
                 return render_template('search.html', products_and_complaints=products_and_complaints)
         except Exception as e:
             print("Error:", e)
@@ -197,13 +199,33 @@ def search():
 
 @app.route("/delete/<string:Cust_ID>",methods=['POST','GET'])
 @login_required
-def delete(Cust_ID):
-    post=Customer.query.filter_by(Cust_ID=Cust_ID).first()
-    db.session.delete(post)
-    db.session.commit()
-    # db.engine.execute(f"DELETE FROM `student` WHERE `student`.`id`={id}")
-    flash("Customer Deleted Successfully","danger")
+
+
+
+
+def delete_customer_and_transactions(Cust_ID):
+    try:
+        # Retrieve the customer
+        customer = Customer.query.filter_by(Cust_ID=Cust_ID).first()
+
+        if not customer:
+            flash("Customer not found", "warning")
+            return redirect('/studentdetails')
+
+        # Now delete the customer
+        db.session.delete(customer)
+        db.session.commit()
+
+        flash("Customer and related transactions deleted successfully", "danger")
+
+    except exc.NoResultFound:
+        flash("Customer not found", "warning")
+    except Exception as e:
+        flash(f"An error occurred: {str(e)}", "danger")
+
     return redirect('/studentdetails')
+
+
 
 
 @app.route("/edit/<string:Cust_ID>",methods=['POST','GET'])
@@ -348,71 +370,59 @@ def addstudent():
 
 @app.route('/addcustomer', methods=['POST', 'GET'])
 @login_required
+
+
 def add_customer():
     if request.method == "POST":
-        # Retrieve the last Cust_ID from the database
-        last_customer = Customer.query.order_by(Customer.Cust_ID.desc()).first()
-        # Set the initial Cust_ID to 1 if there are no existing customers
-        if last_customer:
-            initial_cust_id = last_customer.Cust_ID + 1
-        else:
-            initial_cust_id = 1
+        try:
+            # Retrieve customer details from the form
+            name = request.form.get('Name')
+            address = request.form.get('Address')
+            phone_no = request.form.get('Phone_No')
 
-        # Increment the Cust_ID for the new customer
-        cust_id = initial_cust_id
-        name = request.form.get('Name')
-        address = request.form.get('Address')
-        phone_no = request.form.get('Phone_No')
+            # Create and add the new customer to the database
+            new_customer = Customer(Name=name, Address=address, Phone_No=phone_no)
+            db.session.add(new_customer)
+            db.session.commit()
 
-        # Create and add the new customer to the database
-        new_customer = Customer(Cust_ID=cust_id, Name=name, Address=address, Phone_No=phone_no)
-        db.session.add(new_customer)
-        db.session.commit()
+            # Retrieve product details from the form
+            prod_id = int(request.form.get('existing_product'))
 
-        # Get product details from the form
-        prod_brand = request.form.get('Product_Brand')
-        prod_model = request.form.get('Product_Model')
-        prod_price = float(request.form.get('Displayed_Price'))  # Convert to float for calculations
+            # Retrieve additional transaction details from the form
+            quantity = int(request.form.get('Quantity'))
 
-        # Retrieve the selected product from the database
-        selected_product = Product.query.filter_by(Brand=prod_brand, Model=prod_model, Price=prod_price).first()
+            # Since the trigger handles the calculation of Amount, no need to calculate it here
 
-        if not selected_product:
-            flash("Selected product does not exist. Please choose a valid product.", "danger")
+            # Create and add the new transaction to the database
+            new_transaction = Transaction(Prod_ID=prod_id, Cust_ID=new_customer.Cust_ID, Quantity=quantity)
+            db.session.add(new_transaction)
+            db.session.commit()
+
+            flash("Customer and Transaction Added", "info")
+
+        except Exception as e:
+            flash(f"An error occurred: {str(e)}", "danger")
             return redirect('/addcustomer')
-
-        # Retrieve the last T_ID from the database
-        last_transaction = Transaction.query.order_by(Transaction.T_ID.desc()).first()
-        # Set the initial T_ID to 1 if there are no existing transactions
-        if last_transaction:
-            initial_t_id = last_transaction.T_ID + 1
-        else:
-            initial_t_id = 1
-
-        # Get additional transaction details from the form
-        prod_id = selected_product.Prod_ID
-        s_id = selected_product.S_ID  # Assuming S_ID is associated with the selected product
-        quantity = int(request.form.get('Quantity'))  # Convert to int for storage
-        amount = prod_price * quantity
-
-        # Create and add the new transaction to the database
-        new_transaction = Transaction(T_ID=initial_t_id, Prod_ID=prod_id, Cust_ID=cust_id,
-                                      S_ID=s_id, Quantity=quantity, Amount=amount)
-        db.session.add(new_transaction)
-        db.session.commit()
-
-        flash("Customer, Product, and Transaction Added", "info")
 
     # Retrieve the products for rendering the template
     products = Product.query.all()
     return render_template('student.html', products=products)
+
+
+
+
 
    
 
 
 
 
+@app.route('/about')
 
+def about():
+    return render_template('about.html', user=current_user)  # Pass the user variable if using Flask-Login
+
+    
 
 
 @app.route('/test')
