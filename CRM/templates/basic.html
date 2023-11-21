@@ -10,8 +10,7 @@
   <meta content="" name="description">
   <meta content="" name="keywords">
 
-{% block style %}
-{% endblock style %}
+
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i|Raleway:300,400,500,700,800" rel="stylesheet">
 
   <!-- Vendor CSS Files -->
@@ -22,8 +21,9 @@
   <link href="static/assets/vendor/aos/aos.css" rel="stylesheet">
 
   <!-- Template Main CSS File -->
-  <link href="static/assets/css/style.css" rel="stylesheet">
-
+  <link href="static/assets/css/style2.css" rel="stylesheet">
+{% block style %}
+{% endblock style %}
  
 </head>
 
@@ -33,27 +33,22 @@
   <header id="header">
     <div class="container">
 
+      <div id="logo" class="pull-left">
+
+ <a href="/" class="scrollto">CRM</a>
+      </div>
+
       <nav id="nav-menu-container">
         <ul class="nav-menu">
           <li class="{% block home %}
           {% endblock home %}"><a href="/">Home</a></li>
          
- <li><a href="/addcustomer">Add Customer</a></li>
- <li><a href="/complaints">Customer Complaints</a></li>
- <li><a href="/customerdetails">Customer Details</a></li>
- <li><a href="/search">Search</a></li>
-       
-    
           <li><a href="/about">About</a></li>
-          
-   
-
-    {% if current_user.is_authenticated  %}
-          <li class="buy-tickets"><a href="">Welcome {{current_user.username}}</a></li>
-            <li class="buy-tickets"><a href="/logout">Logout</a></li>
+       {% if user.is_authenticated %}
+          <li class="buy-tickets"><a href="">Welcome</a></li>
+           <li class="buy-tickets"><a href="/logout">Logout</a></li>
           {% else %}
           <li class="buy-tickets"><a href="/signup">Signin</a></li>
-        
           {% endif %}
         </ul>
       </nav><!-- #nav-menu-container -->
@@ -61,14 +56,10 @@
   </header><!-- End Header -->
 
   <!-- ======= Intro Section ======= -->
-  {% if request.path == '/' %}
+ {% block intro %}
 
-  <section id="intro">
-    <div class="intro-container" data-aos="zoom-in" data-aos-delay="100">
-      <h1 class="mb-4 pb-0">CUSTOMER RELATIONSHIP MANAGEMENT SYSTEM </span> </h1>
-      <p class="mb-4 pb-0">DBMS Mini Project Using Flask & MYSQL</p>
-    </div>
-  </section>{% endif %}
+ {% endblock intro %}
+
   <main id="main">
 
 
@@ -81,7 +72,7 @@
 <div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
     {{message}}
 
-
+  
 </div>
 
 
@@ -91,7 +82,7 @@
   {% endblock body %}
 
 
-  <a href="#" class="back-to-top"><i class="fa fa-angle-up"></i></a>
+
 
   <!-- Vendor JS Files -->
   <script src="static/assets/vendor/jquery/jquery.min.js"></script>
