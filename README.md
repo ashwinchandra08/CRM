@@ -1,1 +1,1 @@
-A comprehensive Customer Relationship Management (CRM) system built using Python & MySQL. This application helps businesses manage customer relationships, track interactions, and gain insights through data analytics.
+A comprehensive Customer Relationship Management (CRM) system built using Python, MySQL, and Flask/Django. This application helps businesses manage customer relationships, track interactions, and gain insights through data analytics.
